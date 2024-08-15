@@ -1,5 +1,9 @@
+import model.Book;
+import model.comparison.BookIsbnComparator;
 import org.apache.commons.lang3.NotImplementedException;
 import treestructure.BookNode;
+
+import java.util.Stack;
 
 /**
  * Application to test traversing Binary Trees and Binary Search Trees.
@@ -14,6 +18,7 @@ public class LibraryService {
      * The tree and its nodes should not be modified by our application.
     */
     private final BookNode books;
+    private final BookIsbnComparator comparator;
 
     /**
      * Constructs our library with a default tree of books.
@@ -23,6 +28,7 @@ public class LibraryService {
      */
     public LibraryService(final BookNode books) {
         this.books = books;
+        comparator = new BookIsbnComparator();
     }
 
     /**
@@ -35,8 +41,23 @@ public class LibraryService {
      */
     public boolean isBookInLibraryByIsbn(String isbn) {
         // PARTICIPANTS: IMPLEMENT YOUR BINARY SEARCH HERE
+        Book book = new Book(isbn, null, null); //book to be searched
+        BookNode bookNode = books;
+        if (isbn == null || isbn.isEmpty()) {
+            return false;
+        }
+        while (comparator.compare(bookNode.getBook(), book) != 0) {
+            if (bookNode.getLeft() == null && bookNode.getRight() == null) {
+                return false;
+            } else if (comparator.compare(bookNode.getBook(), book) < 0) { //bookNode's isbn is smaller
+                // than book's isbn
+                bookNode = bookNode.getRight();
+            } else if (comparator.compare(bookNode.getBook(), book) > 0) {
+                bookNode = bookNode.getLeft();
+            }
+        }
+        return true;
 
-        throw new NotImplementedException("isBookInLibraryByIsbn is not yet implemented!");
     }
 
 
@@ -51,7 +72,25 @@ public class LibraryService {
      */
     public boolean isBookInLibraryByTitleAndAuthor(String title, String author) {
         // PARTICIPANTS: IMPLEMENT YOUR DEPTH FIRST SEARCH HERE
+        if (title == null || title.isEmpty() || author == null || author.isEmpty()) {
+            return false;
+        }
 
-        throw new NotImplementedException("isBookInLibraryByTitleAndAuthor is not yet implemented!");
+        Stack<BookNode> bookStack = new Stack<>();
+        bookStack.push(books); //root
+        while (!bookStack.isEmpty()) {
+            BookNode bookNode = bookStack.pop();
+            if (bookNode.getBook().getTitle().equals(title) && bookNode.getBook().getAuthor().equals(author)) {
+                return true;
+            } else {
+                if (bookNode.getLeft() != null) {
+                    bookStack.push(bookNode.getLeft());
+                }
+                if (bookNode.getRight() != null) {
+                    bookStack.push(bookNode.getRight());
+                }
+            }
+        }
+        return false;
     }
 }
